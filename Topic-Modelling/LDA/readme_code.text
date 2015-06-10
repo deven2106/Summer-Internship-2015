@@ -1,0 +1,3 @@
+you need to give two text file 1.txt and 2.txt in same directory.
+you can give as many files as you want just change the file code.py appropriately.
+only append each file content to corpus and you are done :)
