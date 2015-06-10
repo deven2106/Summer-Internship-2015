@@ -20,12 +20,12 @@ class listener(StreamListener):
             tweet = None
 
         if tweet.has_key('id') and tweet.has_key("text"):
-            fp=open("a.txt",'a')
+            fp=open("tweets.txt",'a')
             fp.write(data)
             fp.close()
             self.tweet_count+=1
             #print tweet['text'][0:10].encode('ascii','ignore')
-            print self.tweet_count
+            #print self.tweet_count
         return True
 
     def on_timeout(self):
