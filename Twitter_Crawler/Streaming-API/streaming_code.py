@@ -5,8 +5,6 @@ from tweepy.streaming import StreamListener
 from tweepy import Stream, OAuthHandler
 from time import clock
 import time,sys,datetime
-import couchdb
-
 import settings
 
 class listener(StreamListener):
