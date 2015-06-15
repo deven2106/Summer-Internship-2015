@@ -21,6 +21,8 @@ pas=1       #1 doesn't mean anything
 
 def doc_read():
         #Reading document using cPickle library
+        global text
+        global files
         for file in listdir('.'):
             if isfile(file) and file.endswith('.pkl'):
                 fp=open(file,'r')
@@ -39,9 +41,10 @@ def stopword_removal():
     f=open('stopWords','r')
     stoplist=f.read()
     stoplist=set(stoplist.split())
+    global texts
     texts = [[word for word in t.lower().split() if word not in stoplist]
              for t in text]
-
+    
 def remove():
     if os.path.exists('my_dict.dict'):
         os.remove('my_dict.dict')
@@ -54,23 +57,21 @@ def get_topic_fromlog():
     theFile = open(LOG_FILENAME,'r')
     FILE = theFile.readlines()
     theFile.close()
+    global printlist
     for line in FILE:
         if('topic #' in line):
             printList.append(line)
         if('optimized alpha' in line):
             printList.append(line)
 
-def write_result():
-    f1=open('Topics_'+str(no_top)+'_'+str(pas)+'/Topics_'+str(no_top)+'_pass_'+str(pas)+'.res','w')
-    for item in printList:
-        f1.write(str(item)+'\n')
-    f1.close()
 
 
 def main():
 
     time1=time.time()
     #input parameter read.. value of number of topics and number of passes
+    global no_topic
+    global pas
     no_top=int(sys.argv[1])
     pas=int(sys.argv[2])
 
@@ -83,18 +84,19 @@ def main():
 
     #Logging generation
     tm=time.strftime('%Y%m%d-%H%M%S')
+    global LOG_FILENAME 
     LOG_FILENAME="Topics_"+str(no_top)+"_"+str(pas)+"/log_file"+tm+"_topics_"+str(no_top)+"_pass_"+str(pas)+".log"
     logging.basicConfig(filename=LOG_FILENAME,format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
     os.chdir('./..')
 
     #Reading document using cPickle library
-    doc_read()
+    doc_read()    
 
     ##Stop Word Removal
     stopword_removal()
-
-
+        
+    
     ##Dictionary Creation based on word IDs
     dictionary = corpora.Dictionary(texts)
     dictionary.save('my_dict.dict')
@@ -102,10 +104,11 @@ def main():
 
 
     ##Corpus creation with word IDs and their count
+    global corpus
     corpus = [dictionary.doc2bow(text1) for text1 in texts]
     corpora.MmCorpus.serialize('my_corpus.mm', corpus)
 
-
+    
     ##Loading corpus in MM format
     corpus = corpora.MmCorpus('my_corpus.mm')
 
@@ -115,7 +118,7 @@ def main():
     for word in dictionary.token2id:
         id2word[dictionary.token2id[word]] = word
 
-
+    
     ##LDA module call
     lda = gensim.models.ldamodel.LdaModel(corpus=corpus, alpha='auto', id2word=id2word, num_topics=no_top, update_every=1, chunksize=10000, passes=pas)
 
@@ -134,10 +137,13 @@ def main():
     ##Getting Topic lists from log file
     get_topic_fromlog()
 
-
-
     ##Writing topics to result file
-    write_result()
+    f1=open('Topics_'+str(no_top)+'_'+str(pas)+'/Topics_'+str(no_top)+'_pass_'+str(pas)+'.res','w')
+    for item in printList:
+        f1.write(str(item)+'\n')
+    f1.close()
+    
+
     os.chdir('./..')
     ##Calculating Topic to doc distribution
     f2=open('Log_text files/Topics_'+str(no_top)+'_'+str(pas)+'/Topics_'+str(no_top)+'_pass_'+str(pas)+'.res','a')
